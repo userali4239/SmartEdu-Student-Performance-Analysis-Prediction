@@ -1,0 +1,86 @@
+{
+  "best_model": "Logistic Regression",
+  "uses_scaler": true,
+  "classes": [
+    "High Risk",
+    "Low Risk",
+    "Medium Risk"
+  ],
+  "features": [
+    "Attendance_Percentage",
+    "Quiz_Marks",
+    "Assignment_Marks",
+    "Midterm_Marks"
+  ],
+  "results": {
+    "Logistic Regression": {
+      "accuracy": 0.9496,
+      "precision": 0.935,
+      "recall": 0.931,
+      "f1_score": 0.933,
+      "confusion_matrix": [
+        [
+          1636,
+          0,
+          185
+        ],
+        [
+          0,
+          11448,
+          327
+        ],
+        [
+          154,
+          343,
+          5909
+        ]
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 0.9464,
+      "precision": 0.9343,
+      "recall": 0.9259,
+      "f1_score": 0.9299,
+      "confusion_matrix": [
+        [
+          1610,
+          0,
+          211
+        ],
+        [
+          0,
+          11384,
+          391
+        ],
+        [
+          133,
+          337,
+          5936
+        ]
+      ]
+    },
+    "XGBoost": {
+      "accuracy": 0.9483,
+      "precision": 0.9321,
+      "recall": 0.9305,
+      "f1_score": 0.9313,
+      "confusion_matrix": [
+        [
+          1640,
+          0,
+          181
+        ],
+        [
+          0,
+          11436,
+          339
+        ],
+        [
+          169,
+          345,
+          5892
+        ]
+      ]
+    }
+  }
+}
