@@ -91,11 +91,4 @@ attendance, quiz, assignment, midterm and final marks.
 - **Frontend:** Bootstrap 5, Chart.js, vanilla JS
 - **Reports:** ReportLab (PDF), built-in csv module (CSV)
 
-## Extending to the full PRD scope
 
-The dataset only carries one aggregate score per category (Quiz, Assignment,
-Midterm, Final), so the app mirrors that. To match the PRD's more granular
-schema (Quiz 1/2/3, Assignment 1/2/3, Lab Marks, Class Participation, etc.)
-add columns to `models.Student` and adjust `ml/train_model.py`'s `FEATURES`
-list — the rest of the pipeline (training, prediction, dashboard) will pick
-them up automatically.
