@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} - SmartEdu{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+{% block content %}
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="panel text-center">
+      <div class="avatar mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;">{{ student.name[0] }}</div>
+      <h5 class="mb-0">{{ student.name }}</h5>
+      <div class="text-muted mb-3">{{ student.roll_number }}</div>
+      {% if student.risk_level %}
+      <span class="risk-pill badge-risk-{{ 'low' if student.risk_level=='Low Risk' else ('medium' if student.risk_level=='Medium Risk' else 'high') }}" style="font-size:.9rem;">{{ student.risk_level }}</span>
+      <div class="text-muted mt-2" style="font-size:.82rem;">Confidence: {{ student.confidence }}%</div>
+      {% else %}
+      <span class="text-muted">Not yet predicted</span>
+      {% endif %}
+
+      <hr>
+      <table class="table table-sm text-start mb-0">
+        <tr><td class="text-muted">Father Name</td><td>{{ student.father_name or '-' }}</td></tr>
+        <tr><td class="text-muted">Gender</td><td>{{ student.gender or '-' }}</td></tr>
+        <tr><td class="text-muted">Department</td><td>{{ student.department }}</td></tr>
+        <tr><td class="text-muted">Semester / Section</td><td>{{ student.semester }} / {{ student.section }}</td></tr>
+        <tr><td class="text-muted">Session</td><td>{{ student.session or '-' }}</td></tr>
+        <tr><td class="text-muted">Phone</td><td>{{ student.phone or '-' }}</td></tr>
+        <tr><td class="text-muted">Email</td><td>{{ student.email or '-' }}</td></tr>
+      </table>
+
+      <div class="d-flex gap-2 mt-3">
+        <a href="{{ url_for('student_edit', student_id=student.id) }}" class="btn btn-outline-primary btn-sm flex-fill"><i class="fa-solid fa-pen"></i> Edit</a>
+        <form method="POST" action="{{ url_for('student_delete', student_id=student.id) }}" class="flex-fill" onsubmit="return confirm('Delete this student?');">
+          <button type="submit" class="btn btn-outline-danger btn-sm w-100"><i class="fa-solid fa-trash"></i> Delete</button>
+        </form>
+      </div>
+      <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn btn-primary btn-sm w-100 mt-2"><i class="fa-solid fa-file-pdf"></i> Download Report (PDF)</a>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="panel mb-3">
+      <div class="panel-title">Academic Performance</div>
+      <div class="row g-3 text-center">
+        <div class="col-md-3 col-6"><div class="stat-label">Attendance</div><div class="stat-value">{{ student.attendance_percentage }}%</div></div>
+        <div class="col-md-3 col-6"><div class="stat-label">Quiz</div><div class="stat-value">{{ student.quiz_marks }}/20</div></div>
+        <div class="col-md-3 col-6"><div class="stat-label">Assignment</div><div class="stat-value">{{ student.assignment_marks }}/20</div></div>
+        <div class="col-md-3 col-6"><div class="stat-label">Midterm</div><div class="stat-value">{{ student.midterm_marks }}/30</div></div>
+      </div>
+      <hr>
+      <div class="row g-3 text-center">
+        <div class="col-md-4 col-6"><div class="stat-label">Final Marks</div><div class="stat-value">{{ student.final_marks }}/30</div></div>
+        <div class="col-md-4 col-6"><div class="stat-label">Total</div><div class="stat-value">{{ student.total_marks }}/90</div></div>
+        <div class="col-md-4 col-6"><div class="stat-label">Result</div><div class="stat-value">{{ student.result or '-' }}</div></div>
+      </div>
+    </div>
+
+    <div class="panel mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div class="panel-title mb-0"><i class="fa-solid fa-robot"></i> ML Risk Prediction</div>
+        <form method="POST" action="{{ url_for('student_predict', student_id=student.id) }}">
+          <button type="submit" class="btn btn-sm btn-primary"><i class="fa-solid fa-arrows-rotate"></i> Run Prediction</button>
+        </form>
+      </div>
+      {% if student.risk_level %}
+      <p>Predicted risk level: <b>{{ student.risk_level }}</b> with <b>{{ student.confidence }}%</b> confidence.</p>
+      <div class="panel-title" style="font-size:.9rem;">Recommendations</div>
+      <ul class="mb-0">
+        {% for r in recommendations %}
+          <li>{{ r }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-muted mb-0">No prediction yet. Click "Run Prediction" to analyze this student's risk level.</p>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-calendar-days"></i> Recent Attendance Logs</div>
+      {% if attendance_logs %}
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Date</th><th>Subject</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for l in attendance_logs %}
+          <tr>
+            <td>{{ l.date }}</td>
+            <td>{{ l.subject }}</td>
+            <td>{% if l.present %}<span class="text-success">Present</span>{% else %}<span class="text-danger">Absent</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted mb-0">No attendance logs recorded yet. <a href="{{ url_for('attendance') }}">Add attendance</a></p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Attendance - SmartEdu{% endblock %}
+{% block page_title %}Attendance Management{% endblock %}
+{% block content %}
+
+<div class="panel mb-3">
+  <form method="GET" class="row g-2">
+    <div class="col-md-8">
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search student by name or roll number">
+    </div>
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-search"></i> Search</button>
+    </div>
+  </form>
+</div>
+
+{% if results %}
+<div class="panel">
+  <div class="panel-title">Mark Attendance</div>
+  <form method="POST" class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Student</label>
+      <select name="student_id" class="form-select" required>
+        {% for s in results %}
+        <option value="{{ s.id }}">{{ s.roll_number }} - {{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Subject</label>
+      <input type="text" name="subject" class="form-control" placeholder="e.g. Data Structures" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Date</label>
+      <input type="date" name="date" class="form-control" value="{{ today }}" required>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label">Status</label>
+      <select name="present" class="form-select">
+        <option value="1">Present</option>
+        <option value="">Absent</option>
+      </select>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-check"></i></button>
+    </div>
+  </form>
+</div>
+{% elif q %}
+<p class="text-muted">No students matched "{{ q }}".</p>
+{% else %}
+<div class="panel text-center text-muted py-5">
+  <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+  <p class="mb-0">Search for a student above to record attendance.</p>
+</div>
+{% endif %}
+
+{% endblock %}

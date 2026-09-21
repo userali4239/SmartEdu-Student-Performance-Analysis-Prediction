@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Reports - SmartEdu{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block content %}
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-file-csv"></i> Export All Students (CSV)</div>
+      <p class="text-muted" style="font-size:.88rem;">Download the full student list including marks, attendance and predicted risk levels.</p>
+      <a href="{{ url_for('export_csv') }}" class="btn btn-primary btn-sm">Download All Students</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-triangle-exclamation"></i> Export High Risk Students (CSV)</div>
+      <p class="text-muted" style="font-size:.88rem;">Download only students currently flagged as High Risk.</p>
+      <a href="{{ url_for('export_csv', risk='High Risk') }}" class="btn btn-outline-danger btn-sm">Download High Risk</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-clock"></i> Export Medium Risk Students (CSV)</div>
+      <p class="text-muted" style="font-size:.88rem;">Download only students currently flagged as Medium Risk.</p>
+      <a href="{{ url_for('export_csv', risk='Medium Risk') }}" class="btn btn-outline-warning btn-sm">Download Medium Risk</a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-user"></i> Individual Student Report (PDF)</div>
+      <p class="text-muted" style="font-size:.88rem;">Go to a student's profile page and click "Download Report" for a detailed PDF report.</p>
+      <a href="{{ url_for('students_list') }}" class="btn btn-outline-primary btn-sm">Go to Students</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

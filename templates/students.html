@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Students - SmartEdu{% endblock %}
+{% block page_title %}Student Management{% endblock %}
+{% block content %}
+
+<div class="panel mb-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Search</label>
+      <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Name or Roll Number">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Risk Level</label>
+      <select name="risk" class="form-select">
+        <option value="">All</option>
+        <option value="Low Risk" {{ 'selected' if risk_filter=='Low Risk' }}>Low Risk</option>
+        <option value="Medium Risk" {{ 'selected' if risk_filter=='Medium Risk' }}>Medium Risk</option>
+        <option value="High Risk" {{ 'selected' if risk_filter=='High Risk' }}>High Risk</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Department</label>
+      <select name="department" class="form-select">
+        <option value="">All</option>
+        {% for d in departments %}
+        <option value="{{ d }}" {{ 'selected' if dept_filter==d }}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+      <button type="submit" class="btn btn-primary flex-fill"><i class="fa-solid fa-filter"></i> Filter</button>
+    </div>
+  </form>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="text-muted" style="font-size:.88rem;">{{ pagination.total }} students found</div>
+  <a href="{{ url_for('student_add') }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Student</a>
+</div>
+
+<div class="panel p-0">
+  <table class="table table-hover mb-0">
+    <thead>
+      <tr>
+        <th>Roll No</th><th>Name</th><th>Department</th><th>Sem</th>
+        <th>Attendance</th><th>Marks</th><th>Result</th><th>Risk</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in students %}
+      <tr>
+        <td>{{ s.roll_number }}</td>
+        <td><a href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.name }}</a></td>
+        <td>{{ s.department }}</td>
+        <td>{{ s.semester }}</td>
+        <td>{{ s.attendance_percentage }}%</td>
+        <td>{{ s.total_marks }}/90</td>
+        <td>
+          {% if s.result == 'Pass' %}
+            <span class="badge text-bg-light border">Pass</span>
+          {% else %}
+            <span class="badge text-bg-light border text-danger">Fail</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if s.risk_level %}
+          <span class="risk-pill badge-risk-{{ 'low' if s.risk_level=='Low Risk' else ('medium' if s.risk_level=='Medium Risk' else 'high') }}">{{ s.risk_level }}</span>
+          {% else %}
+          <span class="text-muted" style="font-size:.8rem;">Not predicted</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-eye"></i></a>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="9" class="text-center text-muted py-4">No students found.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination justify-content-center">
+    <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+      <a class="page-link" href="{{ url_for('students_list', page=pagination.prev_num, q=q, risk=risk_filter, department=dept_filter) }}">Previous</a>
+    </li>
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+        <li class="page-item {{ 'active' if p == pagination.page }}">
+          <a class="page-link" href="{{ url_for('students_list', page=p, q=q, risk=risk_filter, department=dept_filter) }}">{{ p }}</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+    <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+      <a class="page-link" href="{{ url_for('students_list', page=pagination.next_num, q=q, risk=risk_filter, department=dept_filter) }}">Next</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

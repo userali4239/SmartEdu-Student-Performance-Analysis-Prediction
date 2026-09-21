@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SmartEdu{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-icon icon-indigo"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-label">Total Students</div>
+      <div class="stat-value">{{ total_students }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-icon icon-green"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="stat-label">Average Attendance</div>
+      <div class="stat-value">{{ avg_attendance }}%</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-icon icon-amber"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="stat-label">Average Marks</div>
+      <div class="stat-value">{{ avg_marks_pct }}%</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="stat-icon icon-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="stat-label">High Risk Students</div>
+      <div class="stat-value">{{ high_risk }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-4">
+    <div class="stat-card text-center">
+      <div class="stat-label">Low Risk</div>
+      <div class="stat-value" style="color:var(--success)">{{ low_risk }}</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat-card text-center">
+      <div class="stat-label">Medium Risk</div>
+      <div class="stat-value" style="color:var(--warning)">{{ medium_risk }}</div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div class="stat-card text-center">
+      <div class="stat-label">High Risk</div>
+      <div class="stat-value" style="color:var(--danger)">{{ high_risk }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-title">Risk Distribution</div>
+      <canvas id="riskChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-title">Attendance Distribution</div>
+      <canvas id="attendanceChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel">
+      <div class="panel-title">Average Marks by Component</div>
+      <canvas id="marksChart" height="220"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-bell text-danger"></i> High Risk Alerts</div>
+      {% if high_risk_students %}
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Roll No</th><th>Name</th><th>Risk</th></tr></thead>
+        <tbody>
+        {% for s in high_risk_students %}
+          <tr>
+            <td><a href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.roll_number }}</a></td>
+            <td>{{ s.name }}</td>
+            <td><span class="risk-pill badge-risk-high">{{ s.risk_level }}</span></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted mb-0">No high risk students right now.</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel">
+      <div class="panel-title"><i class="fa-solid fa-calendar-xmark text-warning"></i> Low Attendance Alerts (&lt;75%)</div>
+      {% if low_attendance_students %}
+      <table class="table table-hover mb-0">
+        <thead><tr><th>Roll No</th><th>Name</th><th>Attendance</th></tr></thead>
+        <tbody>
+        {% for s in low_attendance_students %}
+          <tr>
+            <td><a href="{{ url_for('student_detail', student_id=s.id) }}">{{ s.roll_number }}</a></td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.attendance_percentage }}%</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted mb-0">Everyone is above 75% attendance.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="panel mt-3">
+  <div class="panel-title"><i class="fa-solid fa-robot"></i> ML Model Info</div>
+  <p class="mb-1"><b>Active model:</b> {{ ml_metrics.best_model }}</p>
+  <p class="mb-0 text-muted" style="font-size:.85rem;">
+    Accuracy: {{ ml_metrics.results[ml_metrics.best_model].accuracy * 100 }}% &middot;
+    F1 Score: {{ ml_metrics.results[ml_metrics.best_model].f1_score * 100 }}% &middot;
+    Precision: {{ ml_metrics.results[ml_metrics.best_model].precision * 100 }}% &middot;
+    Recall: {{ ml_metrics.results[ml_metrics.best_model].recall * 100 }}%
+  </p>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch("{{ url_for('api_dashboard_charts') }}")
+  .then(r => r.json())
+  .then(data => {
+    new Chart(document.getElementById('riskChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(data.risk),
+        datasets: [{ data: Object.values(data.risk), backgroundColor: ['#E1523D','#D9A441','#17A673'] }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+    new Chart(document.getElementById('attendanceChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(data.attendance_buckets),
+        datasets: [{ label: 'Students', data: Object.values(data.attendance_buckets), backgroundColor: '#4F46E5', borderRadius: 6 }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+    new Chart(document.getElementById('marksChart'), {
+      type: 'radar',
+      data: {
+        labels: Object.keys(data.marks_avg),
+        datasets: [{ label: 'Average', data: Object.values(data.marks_avg), backgroundColor: 'rgba(124,58,237,.2)', borderColor: '#7C3AED' }]
+      }
+    });
+  });
+</script>
+{% endblock %}

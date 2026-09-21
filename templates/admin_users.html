@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Manage Users - SmartEdu{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+{% block content %}
+
+<div class="panel p-0">
+  <table class="table table-hover mb-0">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td><span class="badge text-bg-light border">{{ u.role|capitalize }}</span></td>
+        <td>{{ u.created_at.strftime('%d %b %Y') }}</td>
+        <td class="text-end">
+          {% if u.id != current_user.id %}
+          <form method="POST" action="{{ url_for('admin_user_delete', user_id=u.id) }}" onsubmit="return confirm('Remove this user?');">
+            <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
